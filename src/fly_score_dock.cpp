@@ -427,8 +427,8 @@ bool FlyScoreDock::init()
 				.toString();
 		eventTimestampMode_->setCurrentIndex(savedMode == QLatin1String("clock") ? 1 : 0);
 		eventLog_.setTimestampMode(savedMode == QLatin1String("clock")
-						   ? FlyScoreEventLog::TimestampMode::WallClock
-						   : FlyScoreEventLog::TimestampMode::Relative);
+					   ? FlyScoreEventLog::TimestampMode::WallClock
+					   : FlyScoreEventLog::TimestampMode::Relative);
 		eventLogToggle_ = new QPushButton(eventsTab);
 		auto *eventsFolder = new QPushButton(fly_i18n("Events.OpenFolder"), eventsTab);
 		connect(eventsFolder, &QPushButton::clicked, this, [this]() {
@@ -504,10 +504,13 @@ bool FlyScoreDock::init()
 	toggleCarouselBtn_ = new QPushButton(content);
 	toggleCarouselBtn_->setCheckable(true);
 	toggleCarouselBtn_->setCursor(Qt::PointingHandCursor);
+	
+	// Modificación: Ocultar e retirar o botón do carrusel para evitar marxes
+	toggleCarouselBtn_->hide();
 
 	bottomRow->addWidget(clearBtn);
 	bottomRow->addStretch(1);
-	bottomRow->addWidget(toggleCarouselBtn_);
+	// bottomRow->addWidget(toggleCarouselBtn_); // Liña comentada
 	bottomRow->addWidget(hotkeysBtn);
 
 	root->addLayout(bottomRow);
@@ -969,15 +972,15 @@ void FlyScoreDock::logStateChanges(const FlyState &before, const FlyState &after
 		const QString label = labelOr(field.label, QStringLiteral("Score %1").arg(i + 1));
 		if (oldField.home != field.home) {
 			eventLog_.appendEvent(QStringLiteral("%1: %2 (%3-%4)")
-						      .arg(label, teamName(after.home, QStringLiteral("Home")))
-						      .arg(field.home)
-						      .arg(field.away));
+					      .arg(label, teamName(after.home, QStringLiteral("Home")))
+					      .arg(field.home)
+					      .arg(field.away));
 		}
 		if (oldField.away != field.away) {
 			eventLog_.appendEvent(QStringLiteral("%1: %2 (%3-%4)")
-						      .arg(label, teamName(after.away, QStringLiteral("Guests")))
-						      .arg(field.home)
-						      .arg(field.away));
+					      .arg(label, teamName(after.away, QStringLiteral("Guests")))
+					      .arg(field.home)
+					      .arg(field.away));
 		}
 		if (oldField.visible != field.visible)
 			eventLog_.appendEvent(QStringLiteral("%1 %2").arg(
@@ -992,8 +995,8 @@ void FlyScoreDock::logStateChanges(const FlyState &before, const FlyState &after
 		const auto &stat = after.single_stats[i];
 		if (oldStat.value != stat.value)
 			eventLog_.appendEvent(QStringLiteral("%1: %2")
-						      .arg(labelOr(stat.label, QStringLiteral("Stat %1").arg(i + 1)))
-						      .arg(stat.value));
+					      .arg(labelOr(stat.label, QStringLiteral("Stat %1").arg(i + 1)))
+					      .arg(stat.value));
 	}
 	if (after.single_stats.size() != before.single_stats.size())
 		eventLog_.appendEvent(QStringLiteral("Single stat configuration changed"));
@@ -1098,8 +1101,8 @@ static void setTimerStoppedAtInitial(FlyTimer &timer)
 void FlyScoreDock::handleRemoteCommand(const QJsonObject &command)
 {
 	const QString action = jsonString(command, QStringLiteral("action")).isEmpty()
-				       ? jsonString(command, QStringLiteral("type"))
-				       : jsonString(command, QStringLiteral("action"));
+			       ? jsonString(command, QStringLiteral("type"))
+			       : jsonString(command, QStringLiteral("action"));
 
 	if (action == QLatin1String("get_state")) {
 		broadcastCurrentState();
