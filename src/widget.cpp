@@ -134,120 +134,12 @@ QWidget *widget_create_discord_card(QWidget *parent)
 	return discordCard;
 }
 
+// O carrusel modifícase para devolver un widget baleiro e oculto
 QWidget *create_widget_carousel(QWidget *parent)
 {
-	auto *wrapper = new QWidget(parent);
-	wrapper->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-
-	auto *root = new QVBoxLayout(wrapper);
-	root->setContentsMargins(0, 0, 0, 0);
-	root->setSpacing(4);
-
-	auto *stack = new QStackedWidget(wrapper);
-	stack->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-
-	stack->addWidget(widget_create_discord_card(stack));
-	stack->addWidget(widget_create_kofi_card(stack));
-
-	root->addWidget(stack);
-
-	QVector<QToolButton *> dots;
-	auto *dotsRow = new QHBoxLayout();
-	dotsRow->setContentsMargins(0, 0, 0, 0);
-	dotsRow->setSpacing(6);
-	dotsRow->addStretch(1);
-
-	const int count = stack->count();
-	for (int i = 0; i < count; ++i) {
-		auto *dot = new QToolButton(wrapper);
-		dot->setText(QStringLiteral("●"));
-		dot->setCheckable(true);
-		dot->setAutoExclusive(true);
-		dot->setCursor(Qt::PointingHandCursor);
-		dot->setToolTip(QStringLiteral("Show card %1").arg(i + 1));
-		dot->setStyleSheet("QToolButton {"
-				   "  border: none;"
-				   "  background: transparent;"
-				   "  color: #666666;"
-				   "  font-size: 13px;"
-				   "  padding: 0;"
-				   "}"
-				   "QToolButton:checked {"
-				   "  color: #ffffff;"
-				   "}");
-		dots << dot;
-		dotsRow->addWidget(dot);
-	}
-	dotsRow->addStretch(1);
-	root->addLayout(dotsRow);
-
-	auto *effect = new QGraphicsOpacityEffect(stack);
-	effect->setOpacity(1.0);
-	stack->setGraphicsEffect(effect);
-
-	auto updateDots = [stack, dots]() {
-		const int idx = stack->currentIndex();
-		for (int i = 0; i < dots.size(); ++i) {
-			if (dots[i])
-				dots[i]->setChecked(i == idx);
-		}
-	};
-
-	updateDots();
-
-	auto *timer = new QTimer(wrapper);
-	timer->setInterval(20000);
-
-	auto switchToIndex = [stack, effect, updateDots, wrapper](int targetIndex) {
-		if (targetIndex < 0 || targetIndex >= stack->count())
-			return;
-		if (targetIndex == stack->currentIndex())
-			return;
-
-		auto *fadeOut = new QPropertyAnimation(effect, "opacity", wrapper);
-		fadeOut->setDuration(180);
-		fadeOut->setStartValue(1.0);
-		fadeOut->setEndValue(0.0);
-
-		auto *fadeIn = new QPropertyAnimation(effect, "opacity", wrapper);
-		fadeIn->setDuration(180);
-		fadeIn->setStartValue(0.0);
-		fadeIn->setEndValue(1.0);
-
-		auto *group = new QSequentialAnimationGroup(wrapper);
-		group->addAnimation(fadeOut);
-		group->addAnimation(fadeIn);
-
-		QObject::connect(fadeOut, &QPropertyAnimation::finished, stack, [stack, targetIndex, updateDots]() {
-			stack->setCurrentIndex(targetIndex);
-			updateDots();
-		});
-
-		group->start(QAbstractAnimation::DeleteWhenStopped);
-	};
-
-	for (int i = 0; i < dots.size(); ++i) {
-		if (!dots[i])
-			continue;
-
-		QObject::connect(dots[i], &QToolButton::clicked, wrapper, [i, timer, switchToIndex]() {
-			if (timer)
-				timer->start();
-			switchToIndex(i);
-		});
-	}
-
-	QObject::connect(timer, &QTimer::timeout, wrapper, [stack, switchToIndex]() {
-		if (stack->count() == 0)
-			return;
-		int next = stack->currentIndex() + 1;
-		if (next >= stack->count())
-			next = 0;
-		switchToIndex(next);
-	});
-
-	timer->start();
-	return wrapper;
+	auto *emptyWrapper = new QWidget(parent);
+	emptyWrapper->hide();
+	return emptyWrapper;
 }
 
 static QFrame *make_link_card(QWidget *parent, const QString &emoji, const QString &title, const QString &subtitle,
@@ -341,6 +233,11 @@ void show_troubleshooting_dialog(QWidget *parent)
 	cl->setContentsMargins(0, 0, 0, 0);
 	cl->setSpacing(10);
 
+	/* 
+	   COMENTADO: Sección de Quick Links e redes sociais.
+	   Desactivouse para limpar a interface de publicidade externa.
+	*/
+	/*
 	{
 		auto *secTitle = new QLabel(QObject::tr("Quick Links"), content);
 		secTitle->setStyleSheet(QStringLiteral("font-weight:700;"));
@@ -376,6 +273,7 @@ void show_troubleshooting_dialog(QWidget *parent)
 					     QObject::tr("Open Instagram"),
 					     QUrl(QStringLiteral("https://www.instagram.com/streamrsc/"))));
 	}
+	*/
 
 	{
 		auto *secTitle = new QLabel(QObject::tr("Video Guides"), content);
